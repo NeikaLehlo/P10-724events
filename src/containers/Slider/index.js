@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useData } from "../../contexts/DataContext";
 import { getMonth } from "../../helpers/Date";
 
@@ -11,20 +11,25 @@ const Slider = () => {
     new Date(evtA.date) < new Date(evtB.date) ? -1 : 1
   );
   const nextCard = () => {
-    setTimeout(
-      () => setIndex(index < byDateDesc.length - 1 ? index + 1 : 0),
-      5000
-    );
+    setIndex((prevIndex) =>byDateDesc && prevIndex < byDateDesc.length - 1 ? prevIndex + 1 : 0);
   };
+
   useEffect(() => {
-    nextCard();
-  });
+    const interval = setInterval(nextCard, 5000);
+    return () =>{
+      clearInterval(interval);
+    }
+  })
+  
+  function clickRadioButton(indexRadio){
+    setIndex(indexRadio);
+  };
+
   return (
     <div className="SlideCardList">
       {byDateDesc?.map((event, idx) => (
-        <>
+        <Fragment key={event.title}>
           <div
-            key={event.title}
             className={`SlideCard SlideCard--${
               index === idx ? "display" : "hide"
             }`}
@@ -38,20 +43,21 @@ const Slider = () => {
               </div>
             </div>
           </div>
-          <div className="SlideCard__paginationContainer">
+          
+        </Fragment>
+      ))}<div className="SlideCard__paginationContainer">
             <div className="SlideCard__pagination">
-              {byDateDesc.map((_, radioIdx) => (
+              {byDateDesc?.map((_, radioIdx) => (
                 <input
-                  key={`${event.id + event.title}`}
+                  key={`${radioIdx+byDateDesc[radioIdx].title}`}
                   type="radio"
                   name="radio-button"
                   checked={index === radioIdx}
+                  onChange={() => clickRadioButton(radioIdx)}
                 />
               ))}
             </div>
           </div>
-        </>
-      ))}
     </div>
   );
 };
